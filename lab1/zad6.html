@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+    <h1>SVG</h1>
+    <script>
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width","1000")
+            .attr("height","1000");
+        svg.append("rect")
+            .attr("x","100")
+            .attr("y","100")
+            .attr("width","200")
+            .attr("height","200")
+            .attr("style","stroke:black;stroke-width:1;fill:orange;");
+        svg.append("rect")
+            .attr("x","185")
+            .attr("y","250")
+            .attr("width","30")
+            .attr("height","50")
+            .attr("style","stroke:black;stroke-width:1;fill:brown;");
+        svg.append("rect")
+            .attr("x","140")
+            .attr("y","160")
+            .attr("width","40")
+            .attr("height","40")
+            .attr("style","stroke:black;stroke-width:1;fill:white;");
+        svg.append("rect")
+            .attr("x","230")
+            .attr("y","160")
+            .attr("width","40")
+            .attr("height","40")
+            .attr("style","stroke:black;stroke-width:1;fill:white;");
+        svg.append("polygon")
+            .attr("points", "100,100 300,100 200,50")
+            .attr("style","stroke:black; stroke-width:1; fill:red;");
+        svg.append("circle")
+            .attr("cx","30")
+            .attr("cy","30")
+            .attr("r","40")
+            .attr("style","fill:yellow;");
+        svg.append("ellipse")
+            .attr("cx","200")
+            .attr("cy","20")
+            .attr("rx", 40)  
+            .attr("ry", 25)
+            .attr("style","fill:lightgray;");
+        svg.append("ellipse")
+            .attr("cx","240")
+            .attr("cy","20")
+            .attr("rx", 40)  
+            .attr("ry", 25)
+            .attr("style","fill:lightgray;");
+        
+        for (var i = 0; i < 500; i++) {
+            svg.append("line")
+                .attr("x1", i * 2)   
+                .attr("y1", 350)     
+                .attr("x2", i * 2)   
+                .attr("y2", 300)     
+                .attr("stroke", "green")
+                .attr("stroke-width", 2);
+        }
+    </script>
+</body>
