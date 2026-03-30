@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <style>
+    .axis { font: 10px sans-serif; }
+    .axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }
+    .line { fill: none; stroke: steelblue; stroke-width: 2px; }
+  </style>
+</head>
+<body>
+<script>
+var data = [
+  { "date": "2026-01-01", "value": 10 },
+  { "date": "2026-01-05", "value": 15 },
+  { "date": "2026-01-10", "value": 8 },
+  { "date": "2026-01-15", "value": 20 },
+  { "date": "2026-01-20", "value": 12 }
+];
+
+var parseDate = d3.time.format("%Y-%m-%d").parse;
+
+data.forEach(function(d){
+  d.date = parseDate(d.date);
+  d.value = +d.value;
+});
+
+var margin = {top: 20, right: 50, bottom: 50, left: 50},
+    width = 800 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.time.scale()
+          .domain(d3.extent(data, function(d){ return d.date; }))
+          .range([0, width]);
+
+var y = d3.scale.linear()
+          .domain([0, d3.max(data, function(d){ return d.value; })])
+          .range([height, 0]);
+
+var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(d3.time.days, 2).tickFormat(d3.time.format("%b %d"));
+var yAxis = d3.svg.axis().scale(y).orient("left").ticks(10);
+
+var line = d3.svg.line()
+             .x(function(d){ return x(d.date); })
+             .y(function(d){ return y(d.value); });
+
+var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+svg.append("g").attr("class","x axis").attr("transform","translate(0," + height + ")").call(xAxis)
+   .selectAll("text").style("text-anchor","end").attr("dx","-0.8em").attr("dy","-0.5em").attr("transform","rotate(-65)");
+
+svg.append("g").attr("class","y axis").call(yAxis)
+   .append("text").attr("transform","rotate(-90)").attr("y",-40).attr("x",-height/2)
+   .style("text-anchor","middle").text("Value");
+
+svg.append("path").datum(data)
+   .attr("class","line")
+   .attr("d", line);
+
+</script>
+</body>
+</html>
