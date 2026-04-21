@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+  <style>
+    body { margin: 0; background: #000; }
+    .orbit { fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 1; }
+    .label { font-size: 11px; fill: rgba(255,255,255,0.6); text-anchor: middle; }
+  </style>
+</head>
+<body>
+<script>
+  var widthSVG = 600;
+  var heightSVG = 600;
+  var cx = widthSVG / 2;
+  var cy = heightSVG / 2;
+
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("width", widthSVG)
+    .attr("height", heightSVG)
+    .style("background", "#000");
+
+  var planets = [
+    { name: "Mercury", color: "#b5b5b5", r: 5,  orbit: 55,  period: 2400   },
+    { name: "Venus",   color: "#e8cda0", r: 9,  orbit: 80,  period: 6100   },
+    { name: "Earth",   color: "#4fa3e0", r: 9,  orbit: 108, period: 10000  },
+    { name: "Mars",    color: "#c1440e", r: 7,  orbit: 138, period: 18800  },
+    { name: "Jupiter", color: "#c88b3a", r: 18, orbit: 182, period: 118600 },
+    { name: "Saturn",  color: "#e4d191", r: 15, orbit: 228, period: 294600 },
+    { name: "Uranus",  color: "#7de8e8", r: 12, orbit: 265, period: 839600 },
+    { name: "Neptune", color: "#3f54ba", r: 11, orbit: 295, period: 1648000 }
+  ];
+
+  svg.append("circle")
+    .attr("cx", cx).attr("cy", cy).attr("r", 28)
+    .style("fill", "rgba(255,200,50,0.15)");
+
+  svg.append("circle")
+    .attr("cx", cx).attr("cy", cy).attr("r", 20)
+    .style("fill", "rgba(255,220,80,0.25)");
+
+  svg.append("circle")
+    .attr("cx", cx).attr("cy", cy).attr("r", 14)
+    .style("fill", "#FDB813");
+
+  planets.forEach(function(p) {
+    svg.append("circle")
+      .attr("cx", cx).attr("cy", cy)
+      .attr("r", p.orbit)
+      .attr("class", "orbit");
+
+    var group = svg.append("g")
+      .attr("transform", "translate(" + cx + "," + cy + ")");
+
+    group.append("circle")
+      .attr("cx", p.orbit).attr("cy", 0)
+      .attr("r", p.r)
+      .style("fill", p.color);
+
+    if (p.name === "Saturn") {
+      group.append("ellipse")
+        .attr("cx", p.orbit).attr("cy", 0)
+        .attr("rx", p.r + 9).attr("ry", 4)
+        .style("fill", "none")
+        .style("stroke", "#c8b560")
+        .style("stroke-width", 3)
+        .style("opacity", 0.7);
+    }
+
+    group.append("text")
+      .attr("x", p.orbit).attr("y", p.r + 13)
+      .attr("class", "label")
+      .text(p.name);
+
+    var startTime = null;
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp;
+      var angle = ((timestamp - startTime) / p.period) * 360;
+      group.attr("transform",
+        "translate(" + cx + "," + cy + ") rotate(" + angle + ")");
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  });
+</script>
+</body>
+</html>

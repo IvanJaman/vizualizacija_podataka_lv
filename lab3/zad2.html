@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+</head>
+<body>
+<script>
+  var widthSVG = 600;
+  var heightSVG = 400;
+  var squareSize = 40;
+  var numSquares = 10;
+
+  var svg = d3.select("body")
+    .append("svg")
+    .attr("width", widthSVG)
+    .attr("height", heightSVG)
+    .style("background", "#f5f5f5");
+
+  var colors = d3.scale.category10();
+
+  function randomBetween(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function runCycle() {
+    svg.selectAll("rect").remove();
+
+    var completed = 0;
+
+    d3.range(numSquares).forEach(function(i) {
+
+      var rx = randomBetween(0, widthSVG - squareSize);
+      var ry = randomBetween(0, heightSVG - squareSize);
+
+      var delayTime = randomBetween(500, 3000);
+      var fillDuration = randomBetween(1000, 5000);
+      var fadeDuration = randomBetween(500, 3000);
+
+      var rect = svg.append("rect")
+        .attr("x", rx)
+        .attr("y", ry)
+        .attr("width", squareSize)
+        .attr("height", squareSize)
+        .style("fill", "none")
+        .style("stroke", colors(i))
+        .style("stroke-width", 2)
+        .style("opacity", 1);
+
+      rect.transition()
+        .delay(delayTime)
+        .duration(fillDuration)
+        .style("fill", colors(i))
+        .each("end", function() {
+
+          var newSize = widthSVG / 2;
+          var delta = (newSize - squareSize) / 2;
+
+          d3.select(this)
+            .transition()
+            .duration(fadeDuration)
+            .attr("x", rx - delta)
+            .attr("y", ry - delta)
+            .attr("width", newSize)
+            .attr("height", newSize)
+            .style("opacity", 0)
+            .each("end", function() {
+              completed++;
+              if (completed === numSquares) {
+                setTimeout(runCycle, 1000);
+              }
+            });
+        });
+    });
+  }
+
+  runCycle();
+</script>
+</body>
+</html>
