@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+
+var width = 500, height = 500, outerRadius = 180, innerRadius = 0;
+
+var color = d3.scale.category20();
+
+var arc = d3.svg.arc()
+    .innerRadius(innerRadius)
+    .outerRadius(outerRadius);
+
+var data = [
+  { name: 'jabuka',  value: 22 },
+  { name: 'kruška',  value: 20 },
+  { name: 'banana',  value: 21 },
+  { name: 'jagoda',  value: 19 },
+  { name: 'ribizla', value: 18 }
+];
+
+var pie = d3.layout.pie()
+    .value(function(d) { return d.value; });
+
+var svg = d3.select("#chart")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var g = svg.append("g")
+    .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+
+var pieData = pie(data);
+
+pieData.forEach(function(d, i) {
+  g.append("path")
+      .datum(d)
+      .attr("fill", color(i))
+      .attr("stroke", "#fff")
+      .attr("stroke-width", "2px")
+      .attr("d", arc);
+});
+
+pieData.forEach(function(d) {
+
+  var midAngle = (d.startAngle + d.endAngle) / 2 - Math.PI / 2;
+
+  var degrees = midAngle * (180 / Math.PI);
+
+  var centroid = arc.centroid(d);
+
+  var labelGroup = g.append("g")
+      .attr("transform",
+            "translate(" + centroid + ") rotate(" + degrees + ")");
+
+  labelGroup.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "-0.4em")
+      .style("font-size", "12px")
+      .style("font-weight", "bold")
+      .style("fill", "#fff")
+      .text(d.data.name);
+
+  labelGroup.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dy", "0.8em")
+      .style("font-size", "11px")
+      .style("fill", "#fff")
+      .text(d.data.value);
+});
+
+</script>
+</body>
+</html>

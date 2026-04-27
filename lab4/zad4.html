@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body { font-family: sans-serif; background: #f5f5f0; }
+
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+      cursor: pointer;
+    }
+
+    .node circle.collapsed {
+      fill: steelblue;
+    }
+
+    .node text {
+      font: 11px sans-serif;
+    }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+</head>
+<body>
+<div id="chart"></div>
+<script>
+
+var width  = 800;
+var height = 500;
+
+var data = {
+  "name": "flare",
+  "children": [
+    {
+      "name": "analytics",
+      "children": [
+        {
+          "name": "cluster",
+          "children": [
+            { "name": "AgglomerativeCluster" },
+            { "name": "CommunityStructure" },
+            { "name": "MergeEdge" }
+          ]
+        },
+        {
+          "name": "graph",
+          "children": [
+            { "name": "BetweennessCentrality" },
+            { "name": "LinkDistance" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "animate",
+      "children": [
+        { "name": "Easing" },
+        { "name": "FunctionSequence" },
+        { "name": "Transitioner" }
+      ]
+    },
+    {
+      "name": "data",
+      "children": [
+        { "name": "DataUtil" },
+        { "name": "DataList" }
+      ]
+    }
+  ]
+};
+
+var cluster = d3.layout.cluster()
+    .size([height, width - 260]);
+
+var diagonal = d3.svg.diagonal()
+    .projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select("#chart")
+    .append("svg")
+    .attr("width",  width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(100, 0)");
+
+function collapse(d) {
+  if (d.children) {
+    d._children = d.children;   
+    d.children  = null;         
+  }
+}
+
+function expand(d) {
+  if (d._children) {
+    d.children  = d._children;  
+    d._children = null;        
+  }
+}
+
+function toggle(d) {
+  if (d.children) {
+    collapse(d);
+  } else {
+    expand(d);
+  }
+  update();
+}
+
+
+function update() {
+
+  var nodes = cluster.nodes(data);
+  var links = cluster.links(nodes);
+
+  var link = svg.selectAll(".link")
+      .data(links, function(d) { return d.target.name; });
+
+  link.enter().append("path")
+      .attr("class", "link")
+      .attr("d", diagonal);
+
+  link.exit().remove();
+
+  link.attr("d", diagonal);
+
+  var node = svg.selectAll(".node")
+      .data(nodes, function(d) { return d.name; });
+
+  var nodeEnter = node.enter()
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) {
+        return "translate(" + d.y + "," + d.x + ")";
+      })
+      .on("click", function(d) { toggle(d); });
+
+  nodeEnter.append("circle").attr("r", 4.5);
+
+  nodeEnter.append("text")
+      .attr("dx", function(d) { return d.children || d._children ? -8 : 8; })
+      .attr("dy", 3)
+      .style("text-anchor", function(d) {
+        return d.children || d._children ? "end" : "start";
+      })
+      .text(function(d) { return d.name; });
+
+  node.exit().remove();
+
+  node.attr("transform", function(d) {
+        return "translate(" + d.y + "," + d.x + ")";
+      });
+
+  node.select("circle")
+      .classed("collapsed", function(d) { return !!d._children; });
+
+  node.select("text")
+      .attr("dx", function(d) { return d.children || d._children ? -8 : 8; })
+      .style("text-anchor", function(d) {
+        return d.children || d._children ? "end" : "start";
+      });
+}
+
+update();
+
+</script>
+</body>
+</html>
