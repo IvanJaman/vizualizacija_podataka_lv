@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/topojson.v1.min.js"></script>
+</head>
+<body>
+
+  <div id="tooltip"></div>
+  <div id="info"></div>
+
+  <script>
+    var width = 960;
+    var height = 700;
+
+    var countyData = {
+      "Bjelovarska-Bilogorska":  { population: 108630, area: 2638, seat: "Bjelovar" },
+      "Brodsko-Posavska":        { population: 142273, area: 2027, seat: "Slavonski Brod" },
+      "Dubrovacko-Neretvanska":  { population: 122417, area: 1781, seat: "Dubrovnik" },
+      "Grad Zagreb":             { population: 767131, area: 641,  seat: "Zagreb" },
+      "Istarska":                { population: 200000, area: 2813, seat: "Pazin" },
+      "Karlovacka":              { population: 110669, area: 3622, seat: "Karlovac" },
+      "Koprivnicko-Krizevacka":  { population: 108674, area: 1746, seat: "Koprivnica" },
+      "Krapinsko-Zagorska":      { population: 117478, area: 1229, seat: "Krapina" },
+      "Licko-Senjska":           { population:  46878, area: 5350, seat: "Gospić" },
+      "Medimurska":              { population: 110664, area:  729, seat: "Čakovec" },
+      "Osjecko-Baranjska":       { population: 262044, area: 4149, seat: "Osijek" },
+      "Pozesko-Slavonska":       { population:  74050, area: 1823, seat: "Požega" },
+      "Primorsko-Goranska":      { population: 278192, area: 3582, seat: "Rijeka" },
+      "Sisacko-Moslavacka":      { population: 152216, area: 4463, seat: "Sisak" },
+      "Splitsko-Dalmatinska":    { population: 452143, area: 4534, seat: "Split" },
+      "Sibensko-Kninska":        { population:  99509, area: 2984, seat: "Šibenik" },
+      "Varazdinska":             { population: 167440, area: 1261, seat: "Varaždin" },
+      "Viroviticko-Podravska":   { population:  76383, area: 2068, seat: "Virovitica" },
+      "Vukovarsko-Srijemska":    { population: 166102, area: 2448, seat: "Vukovar" },
+      "Zadarska":                { population: 165562, area: 3642, seat: "Zadar" },
+      "Zagrebacka":              { population: 300491, area: 3078, seat: "Zagreb" }
+    };
+
+    var populations = d3.values(countyData).map(function(d) { return d.population; });
+
+    var colorScale = d3.scale.quantize()
+      .domain([d3.min(populations), d3.max(populations)])
+      .range(["#c6dbef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#08519c", "#08306b"]);
+
+    var projection = d3.geo.mercator()
+      .center([0, 10])
+      .scale(6000)
+      .translate([17600, 4500])
+      .rotate([-180, 0]);
+
+    var path = d3.geo.path()
+      .projection(projection);
+
+    var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .style("background", "black");
+
+    var g = svg.append("g");
+
+    var zoom = d3.behavior.zoom()
+      .on("zoom", function() {
+        g.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+      });
+
+    svg.call(zoom);
+
+    d3.json("cro_regv3.json", function(error, cro) {
+      if (error) {
+        console.error("JSON load failed:", error);
+        return;
+      }
+
+      var data = topojson.feature(cro, cro.objects.layer1);
+
+      g.selectAll("path.county")
+        .data(data.features)
+        .enter()
+        .append("path")
+        .attr("class", "county")
+        .attr("id", function(d) { return d.id; })
+        .attr("d", path)
+        .style("fill", function(d) {
+          var info = countyData[d.properties.name];
+          return info ? colorScale(info.population) : "gray";
+        })
+        .style("stroke", "gray")
+        .style("stroke-width", 1)
+        .style("stroke-opacity", 1)
+        .on("mouseover", function(d) {
+          document.getElementById("tooltip").textContent = d.properties.name;
+        })
+        .on("mouseout", function() {
+          document.getElementById("tooltip").textContent = "";
+        })
+        .on("click", function(d) {
+          var info = countyData[d.properties.name];
+          if (info) {
+            document.getElementById("info").textContent =
+              d.properties.name +
+              " | Stanovnistvo: " + info.population +
+              " | Povrsina: " + info.area + " km2" +
+              " | Sjediste: " + info.seat;
+          }
+        });
+    });
+  </script>
+</body>
+</html>
